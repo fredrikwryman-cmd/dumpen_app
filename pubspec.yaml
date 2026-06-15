@@ -1,0 +1,51 @@
+name: dumpen_app
+description: "Dumpen.se mobilapp — en gåva till barnrättsrörelsen"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  http: ^1.2.0
+  cached_network_image: ^3.3.1
+  flutter_html: ^3.0.0-beta.2
+  url_launcher: ^6.2.5
+  share_plus: ^9.0.0
+  intl: ^0.19.0
+  shimmer: ^3.0.0
+  qr_flutter: ^4.1.0
+  flutter_cache_manager: ^3.3.1
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.10
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
+# Kör efter `flutter pub get`:
+#   flutter pub run flutter_launcher_icons
+#   flutter pub run flutter_native_splash:create
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  adaptive_icon_background: "#1a1a1a"
+  adaptive_icon_foreground: "assets/icon.png"
+
+flutter_native_splash:
+  color: "#1a1a1a"
+  image: assets/icon.png
+  android: true
+  ios: true
+  web: false
