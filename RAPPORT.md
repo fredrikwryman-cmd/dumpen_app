@@ -164,4 +164,72 @@ dumpen_app/
 
 ---
 
+## Fortsatt arbete — 2026-06-14 (senare under dagen)
+
+**Uppdrag:** Polering och nya features enligt användarens prioritering.
+
+### FEATURE 1 — Centraliserad färgpalett
+**Problem:** Appfärger (`#1a1a1a`, `#262626`, `#f5f5f5`, `#16a34a` m.fl.) var hårdkodade på tiotals ställen.  
+**Lösning:** Skapat `lib/constants/app_colors.dart` som enda källa till sanning för alla färger och gråskalor.
+
+| Fil | Ändring |
+|---|---|
+| `lib/constants/app_colors.dart` | Ny fil med `AppColors.background`, `.surface`, `.foreground`, `.primaryGreen`, `.linkBlue`, `.errorRed`, `.mutedGrey`, `.grey300–grey900` |
+| `lib/main.dart` | Tema använder `AppColors` |
+| `lib/models/post.dart` | `categoryColor`-fallback använder `AppColors.mutedGrey` |
+| `lib/screens/*.dart` | Alla skärmar bytt till `AppColors` |
+| `lib/widgets/*.dart` | Alla widgets bytt till `AppColors` |
+
+Verifiering: Grep efter `Color(0xFF1a1a1a)` etc. returnerar endast träffar i `app_colors.dart`.
+
+### FEATURE 2 — Offline-stöd för kategoriflöden och sök
+**Problem:** Bara senaste inlägg, enskilda artiklar och kategorier cachades. Kategoriflöden och sök blev tomma offline.  
+**Lösning:** Utökat `CacheService` och `WordPressApi` med cache/fallback för kategoriinlägg och sökresultat.
+
+| Fil | Ändring |
+|---|---|
+| `lib/services/cache_service.dart` | Nya metoder: `saveCategoryPosts`, `getCategoryPosts`, `saveSearchResults`, `getSearchResults` |
+| `lib/services/wordpress_api.dart` | `fetchPostsByCategory` och `searchPosts` cachar sidan 1 och faller tillbaka på cache vid `SocketException` |
+
+### FEATURE 3 — Paginering och pull-to-refresh i sök
+**Problem:** Sök returnerade max 10 träffar och gick inte att uppdatera genom att dra.  
+**Lösning:** Omskriven `SearchScreen` med `ScrollController`, oändlig scroll och `RefreshIndicator`.
+
+| Fil | Ändring |
+|---|---|
+| `lib/screens/search_screen.dart` | `_performSearch({required bool refresh})`, `_onScroll`, `_page`, `_hasMore`, `_isLoadingMore`, pull-to-refresh |
+
+### FEATURE 4 — App-ikon, splash screen och git
+**Problem:** Tom `assets/`-mapp, ingen versionshantering, ingen launcher/splash-konfiguration.  
+**Lösning:** Skapat en placeholder-ikon, konfigurerat `flutter_launcher_icons` och `flutter_native_splash`, initierat git-repo och gjort första commiten.
+
+| Fil | Ändring |
+|---|---|
+| `assets/icon.png` | Ny placeholder-ikon ("D" på mörk bakgrund) — bör bytas mot Dumpens riktiga logo |
+| `pubspec.yaml` | Tillagda dev-dependencies `flutter_launcher_icons` och `flutter_native_splash` med konfiguration |
+| `.git/` | Initierat repository |
+
+Commit: `428633b feat: centralized colors, offline cache, search pagination, icon/splash setup`
+
+### Kommandon att köra lokalt
+
+Eftersom Flutter inte finns i PATH i denna miljö behöver användaren köra följande på sin egen dator:
+
+```bash
+cd C:/Users/fredr/dumpen_app
+flutter pub get
+flutter pub run flutter_launcher_icons
+flutter pub run flutter_native_splash:create
+flutter analyze
+flutter run
+```
+
+### Kvarstående saker
+
+1. **Placeholder-ikon:** Ersätt `assets/icon.png` med Dumpens riktiga logo innan release.
+2. **Flutter-test:** Måste köras lokalt eftersom Flutter inte är tillgängligt här.
+3. **Eventuella analyzer-varningar:** Kan behöva justeras efter lokal `flutter analyze`.
+
+---
+
 *Rapporten är klar för överlämning till användaren och/eller fortsatt arbete av annan AI-agent.*
