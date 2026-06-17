@@ -83,93 +83,145 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: const Text(
-          'KATEGORIER',
-          style: TextStyle(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            pinned: true,
+            backgroundColor: AppColors.background.withValues(alpha: 0.95),
+            elevation: 0,
+            title: const Text(
+              'KATEGORIER',
+              style: TextStyle(
+                color: AppColors.foreground,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+                fontSize: 18,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              style: const TextStyle(color: AppColors.foreground),
-              decoration: InputDecoration(
-                hintText: 'Sök kategori...',
-                hintStyle: TextStyle(color: AppColors.grey500),
-                prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                filled: true,
-                fillColor: AppColors.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                style: const TextStyle(color: AppColors.foreground),
+                decoration: InputDecoration(
+                  hintText: 'Sök kategori...',
+                  hintStyle: TextStyle(color: AppColors.grey500),
+                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),
           ),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _error != null && _categories.isEmpty
-                    ? _buildError()
-                    : _filtered.isEmpty
-                        ? _buildEmpty()
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            itemCount: _filtered.length,
-                            itemBuilder: (context, index) {
-                              final category = _filtered[index];
-                              return _CategoryCard(
-                                category: category,
-                                onTap: () => _openCategory(category),
-                              );
-                            },
-                          ),
-          ),
+          _buildBody(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null && _categories.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: _buildError(),
+      );
+    }
+
+    if (_filtered.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: _buildEmpty(),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final category = _filtered[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: _CategoryCard(
+              category: category,
+              onTap: () => _openCategory(category),
+            ),
+          );
+        },
+        childCount: _filtered.length,
       ),
     );
   }
 
   Widget _buildError() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, color: Colors.white54, size: 48),
-          const SizedBox(height: 16),
-          Text(
-            'Kunde inte ladda kategorier.',
-            style: TextStyle(color: AppColors.grey400),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadCategories,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.surface,
-              foregroundColor: AppColors.foreground,
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cloud_off_outlined, color: AppColors.grey500, size: 56),
+            const SizedBox(height: 20),
+            Text(
+              'Kunde inte ladda kategorier',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.foreground,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            child: const Text('Försök igen'),
-          ),
-        ],
+            const SizedBox(height: 8),
+            const Text(
+              'Kontrollera din internetanslutning och försök igen.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.foregroundMuted, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: _loadCategories,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Försök igen'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildEmpty() {
     return Center(
-      child: Text(
-        'Inga kategorier matchade sökningen.',
-        style: TextStyle(color: AppColors.grey400),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, color: AppColors.grey600, size: 56),
+          const SizedBox(height: 16),
+          const Text(
+            'Inga kategorier matchade sökningen.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.foregroundMuted),
+          ),
+        ],
       ),
     );
   }
@@ -183,23 +235,39 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return Material(
       color: AppColors.surface,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(color: category.color, width: 6),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.surface,
+                AppColors.surface,
+                category.color.withValues(alpha: 0.08),
+              ],
+              stops: const [0.0, 0.7, 1.0],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
             ),
           ),
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: category.color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,17 +279,17 @@ class _CategoryCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       '${category.count} inlägg',
-                      style: TextStyle(color: AppColors.grey400),
+                      style: TextStyle(color: AppColors.grey500),
                     ),
                   ],
                 ),
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                color: category.color,
+                color: AppColors.grey500,
                 size: 18,
               ),
             ],

@@ -47,7 +47,7 @@ class SwishBanner extends StatelessWidget {
           Text(
             'Swisha till:',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: compact ? 14 : 16,
             ),
           ),

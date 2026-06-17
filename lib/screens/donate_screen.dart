@@ -79,166 +79,204 @@ class DonateScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: const Text(
-          'STÖD DUMPEN',
-          style: TextStyle(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          // Swish-sektion
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            pinned: true,
+            backgroundColor: AppColors.background.withValues(alpha: 0.95),
+            elevation: 0,
+            title: const Text(
+              'STÖD DUMPEN',
+              style: TextStyle(
+                color: AppColors.foreground,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+                fontSize: 18,
+              ),
             ),
-            child: Column(
-              children: [
-                const Icon(
-                  Icons.volunteer_activism,
-                  color: AppColors.primaryGreen,
-                  size: 48,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Swisha till Dumpen',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.foreground,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _swishNumber,
-                    style: const TextStyle(
-                      color: AppColors.foreground,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Swish-sektion
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.border),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                QrImageView(
-                  data: _swishUrl,
-                  size: 200,
-                  backgroundColor: Colors.white,
-                  padding: const EdgeInsets.all(12),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _copyNumber(context),
-                        icon: const Icon(Icons.copy),
-                        label: const Text('Kopiera'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.foreground,
-                          side: const BorderSide(color: Colors.white24),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.volunteer_activism,
+                          color: AppColors.primaryGreen,
+                          size: 52,
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _openSwish(context),
-                        icon: const Icon(Icons.payment),
-                        label: const Text('Öppna Swish'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGreen,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Swisha till Dumpen',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: AppColors.foreground,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Ditt stöd gör skillnad',
+                          style: TextStyle(color: AppColors.foregroundMuted),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 28,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.background,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: const Text(
+                            _swishNumber,
+                            style: TextStyle(
+                              color: AppColors.foreground,
+                              fontSize: 34,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: QrImageView(
+                            data: _swishUrl,
+                            size: 180,
+                            backgroundColor: Colors.white,
+                            padding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => _copyNumber(context),
+                                icon: const Icon(Icons.copy),
+                                label: const Text('Kopiera'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.foreground,
+                                  side: const BorderSide(color: AppColors.border),
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () => _openSwish(context),
+                                icon: const Icon(Icons.payment),
+                                label: const Text('Öppna Swish'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryGreen,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Kräver att Swish-appen är installerad.',
+                          style: TextStyle(
+                            color: AppColors.grey500,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Fakta om Dumpen
+                  Text(
+                    'Om Dumpen',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: AppColors.foreground,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 14),
+                  const _FactCard(
+                    icon: Icons.people,
+                    text:
+                        'Barnrättsrörelse ledd av Sara Nilsson & Patrik Sjöberg.',
+                  ),
+                  const _FactCard(
+                    icon: Icons.gavel,
+                    text:
+                        'Mål: Lagändring så planerade övergrepp på fiktiva barn blir straffbara.',
+                  ),
+                  const _FactCard(
+                    icon: Icons.calendar_today_outlined,
+                    text: 'Grundad 2021.',
+                  ),
+                  const _FactCard(
+                    icon: Icons.favorite_outline,
+                    text:
+                        'Föreningen betalar vård för övergreppsutsatta som nekats hjälp.',
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Sekundära knappar
+                  OutlinedButton.icon(
+                    onPressed: _shareApp,
+                    icon: const Icon(Icons.share),
+                    label: const Text('Dela appen'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.foreground,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Kräver att Swish-appen är installerad.',
-                  style: TextStyle(
-                    color: AppColors.grey500,
-                    fontSize: 12,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _openWebsite,
+                    icon: const Icon(Icons.open_in_browser),
+                    label: const Text('Besök dumpen.se'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.foreground,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 24),
-
-          // Fakta om Dumpen
-          Text(
-            'Om Dumpen',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.foreground,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 12),
-          const _FactCard(
-            icon: Icons.people,
-            text:
-                'Barnrättsrörelse ledd av Sara Nilsson & Patrik Sjöberg.',
-          ),
-          const _FactCard(
-            icon: Icons.gavel,
-            text:
-                'Mål: Lagändring så planerade övergrepp på fiktiva barn blir straffbara.',
-          ),
-          const _FactCard(
-            icon: Icons.calendar_today,
-            text: 'Grundad 2021.',
-          ),
-          const _FactCard(
-            icon: Icons.favorite,
-            text:
-                'Föreningen betalar vård för övergreppsutsatta som nekats hjälp.',
-          ),
-          const SizedBox(height: 24),
-
-          // Sekundära knappar
-          OutlinedButton.icon(
-            onPressed: _shareApp,
-            icon: const Icon(Icons.share),
-            label: const Text('Dela appen'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.foreground,
-              side: const BorderSide(color: Colors.white24),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _openWebsite,
-            icon: const Icon(Icons.open_in_browser),
-            label: const Text('Besök dumpen.se'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.foreground,
-              side: const BorderSide(color: Colors.white24),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-          const SizedBox(height: 32),
         ],
       ),
     );
@@ -253,30 +291,30 @@ class _FactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      color: AppColors.surface,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: AppColors.primaryGreen, size: 24),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  color: AppColors.foreground,
-                  fontSize: 15,
-                  height: 1.4,
-                ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.primaryGreen, size: 24),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: AppColors.foreground,
+                fontSize: 15,
+                height: 1.4,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

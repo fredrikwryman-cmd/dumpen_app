@@ -1,7 +1,6 @@
 /// # Kategorifilter-chip
 ///
-/// Ett litet valbart chip för toppen av feeden. Visar kategorinamnet med
-/// en färgmarkerad kant och bakgrund beroende på om det är valt.
+/// Ett modernt, valbart chip för toppen av feeden.
 library;
 
 import 'package:flutter/material.dart';
@@ -26,22 +25,36 @@ class CategoryChip extends StatelessWidget {
     final color = category.color;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: ChoiceChip(
-        label: Text(category.name),
-        selected: selected,
-        onSelected: (_) => onTap(),
-        labelStyle: TextStyle(
-          color: selected ? Colors.white : color,
-          fontWeight: FontWeight.w600,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        child: Material(
+          color: selected ? color : AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: selected ? Colors.transparent : AppColors.border,
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                category.name,
+                style: TextStyle(
+                  color: selected ? Colors.white : AppColors.foregroundMuted,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
         ),
-        selectedColor: color,
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: color, width: 1.5),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       ),
     );
   }

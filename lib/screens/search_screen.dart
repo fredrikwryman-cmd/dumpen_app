@@ -129,33 +129,37 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.foreground),
-        title: TextField(
-          controller: _controller,
-          focusNode: _focusNode,
-          autofocus: true,
-          style: const TextStyle(color: AppColors.foreground),
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            hintText: 'Sök på Dumpen...',
-            hintStyle: TextStyle(color: AppColors.grey500),
-            border: InputBorder.none,
-            suffixIcon: _controller.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, color: Colors.white54),
-                    onPressed: () {
-                      _controller.clear();
-                      setState(() {
-                        _results = [];
-                        _hasSearched = false;
-                        _hasMore = true;
-                        _error = null;
-                      });
-                    },
-                  )
-                : null,
+        titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            autofocus: true,
+            style: const TextStyle(color: AppColors.foreground),
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: 'Sök på Dumpen...',
+              hintStyle: TextStyle(color: AppColors.grey500),
+              border: InputBorder.none,
+              suffixIcon: _controller.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.white54),
+                      onPressed: () {
+                        _controller.clear();
+                        setState(() {
+                          _results = [];
+                          _hasSearched = false;
+                          _hasMore = true;
+                          _error = null;
+                        });
+                      },
+                    )
+                  : null,
+            ),
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => _performSearch(refresh: true),
           ),
-          textInputAction: TextInputAction.search,
-          onSubmitted: (_) => _performSearch(refresh: true),
         ),
         actions: [
           IconButton(
@@ -208,7 +212,7 @@ class _SearchScreenState extends State<SearchScreen> {
       itemBuilder: (context, index) {
         if (index >= _results.length) {
           return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: CircularProgressIndicator(color: AppColors.foreground),
             ),
@@ -226,25 +230,39 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildError() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.white54, size: 48),
-            const SizedBox(height: 16),
+            Icon(Icons.cloud_off_outlined, color: AppColors.grey500, size: 56),
+            const SizedBox(height: 20),
             Text(
-              'Något gick fel vid sökningen.',
+              'Något gick fel vid sökningen',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.grey400),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.foreground,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
+            const SizedBox(height: 8),
+            const Text(
+              'Kontrollera din internetanslutning och försök igen.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.foregroundMuted, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
               onPressed: () => _performSearch(refresh: true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.surface,
-                foregroundColor: AppColors.foreground,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('Försök igen'),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Försök igen'),
             ),
           ],
         ),
@@ -262,7 +280,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.grey400),
+            style: const TextStyle(color: AppColors.foregroundMuted),
           ),
         ],
       ),

@@ -233,3 +233,61 @@ flutter run
 ---
 
 *Rapporten är klar för överlämning till användaren och/eller fortsatt arbete av annan AI-agent.*
+
+
+---
+
+## Fortsatt arbete — 2026-06-17
+
+**Uppdrag:** Följa upp RAPPORT:s rekommenderade nästa steg: lokal test, felsökning och commit.
+
+### Verifiering av Flutter-miljö
+Flutter SDK är nu tillgängligt i PATH (version 3.44.2, Dart 3.12.2). Tidigare blockerare "Flutter inte tillgängligt i PATH" är därmed borta.
+
+### TEST 1 — Dependencies och analyzer
+| Kommando | Resultat |
+|---|---|
+| `flutter pub get` | ✅ Lyckades, 18 paket har nyare versioner men är kompatibla |
+| `flutter analyze` | ✅ `No issues found!` (87,3 s) |
+
+### TEST 2 — Android-bygge
+| Kommando | Resultat |
+|---|---|
+| `flutter build apk --debug` | ✅ Lyckades efter manifest-fix. APK: `build/app/outputs/flutter-apk/app-debug.apk` (~161 MB) |
+
+**Fel som uppstod och åtgärdades:**
+
+```
+Incorrect package="se.dumpen.app" found in source AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported.
+```
+
+**Åtgärd:** Tog bort `package="se.dumpen.app"` från `android/app/src/main/AndroidManifest.xml`. Namespace och applicationId styrs nu enbart från `android/app/build.gradle.kts` (`com.example.dumpen_app`).
+
+### TEST 3 — Web-bygge
+| Kommando | Resultat |
+|---|---|
+| `flutter build web` | ✅ Lyckades. Notering: WASM dry run varning och icon tree-shaking är normala meddelanden. |
+
+### Varning — share_plus / Kotlin Gradle Plugin (KGP)
+Byggloggen visar fortfarande:
+
+```
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): share_plus
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+```
+
+Detta är ett **plugin-problem**, inte ett app-problem. Senaste `share_plus` (13.1.0) tillämpar fortfarande KGP enligt [fluttercommunity/plus_plugins#3831](https://github.com/fluttercommunity/plus_plugins/issues/3831). Flutter 3.44 har tillfällig bakåtkompatibilitet (`android.builtInKotlin=false` och `android.newDsl=false` finns redan i `gradle.properties`), så bygget fungerar idag. När `share_plus` uppdateras av plugin-författarna försvinner varningen automatiskt vid `flutter pub upgrade`.
+
+### Okänd fil — `dumpen_videos.json`
+Filen `dumpen_videos.json` (ca 962 kB, otrackad) ligger i projektroten men refereras inte av appkoden. Troligen en testdump eller export från WordPress. Den har inte committats.
+
+### Kvarstående saker
+1. **Placeholder-ikon:** `assets/icon.png` är fortfarande en placeholder. Ersätt med Dumpens riktiga logo innan release.
+2. **Commit:** Alla ändringar sedan senaste commit är fortfarande ocommittade. Enligt tidigare direktiv bör de commit:as.
+3. **share_plus:** Invänta plugin-uppdatering för att bli av med KGP-varningen.
+4. **Release-build:** `flutter build apk --release` kan testas när ikon och signeringskonfig är på plats.
+
+---
+
+*Rapporten uppdaterad 2026-06-17.*

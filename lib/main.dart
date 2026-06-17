@@ -60,8 +60,6 @@ class DumpenApp extends StatelessWidget {
         onSecondary: Colors.white,
         surface: AppColors.surface,
         onSurface: AppColors.foreground,
-        background: AppColors.background,
-        onBackground: AppColors.foreground,
         error: AppColors.errorRed,
         onError: Colors.white,
       ),

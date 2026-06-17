@@ -1,7 +1,7 @@
 /// # Artikelvisning
 ///
 /// Visar en enskild artikel med hero-bild, titel, metadata, HTML-brödtext,
-/// Swish-banner, dela-knapp och öppna-i-webbläsare-knapp.
+/// inbäddade videor, Swish-banner, dela-knapp och öppna-i-webbläsare-knapp.
 library;
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,10 +10,12 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:html/parser.dart' as html_parser;
 
 import '../constants/app_colors.dart';
 import '../models/post.dart';
 import '../services/wordpress_api.dart';
+import '../widgets/html_video_player.dart';
 import '../widgets/shimmer_card.dart';
 import '../widgets/swish_banner.dart';
 
@@ -78,6 +80,36 @@ class _ArticleScreenState extends State<ArticleScreen> {
     }
   }
 
+  /// Extraherar videokällor ur HTML-innehåll.
+  List<String> _extractVideoUrls(String html) {
+    final document = html_parser.parse(html);
+    final videos = document.querySelectorAll('video');
+    final urls = <String>[];
+    for (final video in videos) {
+      // 1. Direkt src på <video>
+      final directSrc = video.attributes['src'];
+      if (directSrc != null && directSrc.isNotEmpty) {
+        urls.add(directSrc);
+        continue;
+      }
+      // 2. <source src="...">
+      final source = video.querySelector('source');
+      final sourceSrc = source?.attributes['src'];
+      if (sourceSrc != null && sourceSrc.isNotEmpty) {
+        urls.add(sourceSrc);
+      }
+    }
+    return urls;
+  }
+
+  /// Tar bort ursprungliga <video>-taggar ur HTML så att vi kan rendera dem
+  /// separat på ett kontrollerat sätt.
+  String _stripVideoTags(String html) {
+    final document = html_parser.parse(html);
+    document.querySelectorAll('video').forEach((e) => e.remove());
+    return document.body?.innerHtml ?? html;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -106,20 +138,33 @@ class _ArticleScreenState extends State<ArticleScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Colors.white54, size: 48),
-              const SizedBox(height: 16),
+              Icon(Icons.cloud_off_outlined, color: AppColors.grey500, size: 56),
+              const SizedBox(height: 20),
               Text(
                 'Kunde inte ladda artikeln.',
-                style: TextStyle(color: AppColors.grey400),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.foreground,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
+              const SizedBox(height: 8),
+              const Text(
+                'Kontrollera din internetanslutning.',
+                style: TextStyle(color: AppColors.foregroundMuted),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
                 onPressed: _loadPost,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.surface,
-                  foregroundColor: AppColors.foreground,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primaryGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Försök igen'),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Försök igen'),
               ),
             ],
           ),
@@ -130,6 +175,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
     final post = _post!;
     final dateFormat = DateFormat('d MMMM y', 'sv_SE');
     final heroImage = post.featuredMedia?.full ?? post.featuredMedia?.feedUrl;
+    final videoUrls = _extractVideoUrls(post.content);
+    final articleHtml = _stripVideoTags(post.content);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -191,7 +238,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: post.categoryColor.withOpacity(0.15),
+                          color: post.categoryColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: post.categoryColor, width: 1),
                         ),
@@ -221,15 +268,15 @@ class _ArticleScreenState extends State<ArticleScreen> {
                       Row(
                         children: [
                           Icon(
-                            Icons.person,
+                            Icons.person_outline,
                             size: 16,
-                            color: AppColors.grey400,
+                            color: AppColors.grey500,
                           ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               post.authorName,
-                              style: TextStyle(color: AppColors.grey400),
+                              style: TextStyle(color: AppColors.grey500),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -241,30 +288,52 @@ class _ArticleScreenState extends State<ArticleScreen> {
                           Icon(
                             Icons.access_time,
                             size: 16,
-                            color: AppColors.grey400,
+                            color: AppColors.grey500,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             '${post.readingTimeMinutes} min läsning',
-                            style: TextStyle(color: AppColors.grey400),
+                            style: TextStyle(color: AppColors.grey500),
                           ),
                           const SizedBox(width: 20),
                           Icon(
-                            Icons.calendar_today,
+                            Icons.calendar_today_outlined,
                             size: 16,
-                            color: AppColors.grey400,
+                            color: AppColors.grey500,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             dateFormat.format(post.date),
-                            style: TextStyle(color: AppColors.grey400),
+                            style: TextStyle(color: AppColors.grey500),
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
+                      // Videor
+                      if (videoUrls.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              videoUrls.length == 1 ? 'Video' : 'Videor',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: AppColors.foreground,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...videoUrls.map(
+                              (url) => HtmlVideoPlayer(videoUrl: url),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
                       // HTML-innehåll
                       Html(
-                        data: post.content,
+                        data: articleHtml,
                         style: {
                           'body': Style(
                             color: AppColors.foreground,

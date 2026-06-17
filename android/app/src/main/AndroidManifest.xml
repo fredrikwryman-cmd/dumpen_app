@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="se.dumpen.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Krävs för att ladda inlägg och bilder från dumpen.se -->
     <uses-permission android:name="android.permission.INTERNET" />

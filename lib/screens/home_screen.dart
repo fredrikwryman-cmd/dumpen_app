@@ -122,93 +122,175 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: const Text(
-          'DUMPEN',
-          style: TextStyle(
-            color: AppColors.foreground,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.foreground),
-            tooltip: 'Sök',
-            onPressed: _openSearch,
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         color: AppColors.foreground,
         backgroundColor: AppColors.surface,
         onRefresh: () => _loadPosts(refresh: true),
-        child: Column(
-          children: [
+        child: CustomScrollView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // Appbar med logo
+            SliverAppBar(
+              floating: true,
+              pinned: true,
+              backgroundColor: AppColors.background.withValues(alpha: 0.95),
+              elevation: 0,
+              centerTitle: false,
+              title: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGreen,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'D',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'DUMPEN',
+                    style: TextStyle(
+                      color: AppColors.foreground,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.search, color: AppColors.foreground),
+                  tooltip: 'Sök',
+                  onPressed: _openSearch,
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+            // Hero / intro
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Senaste från Dumpen',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: AppColors.foreground,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Barnrättsrörelsen som exponerar barnfridsbrott.',
+                      style: TextStyle(
+                        color: AppColors.foregroundMuted,
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             // Kategorifilter
-            Container(
-              height: 52,
-              color: AppColors.background,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: _topFilters.length,
-                itemBuilder: (context, index) {
-                  final filter = _topFilters[index];
-                  final category = WpCategory(
-                    id: filter['id'] as int,
-                    name: filter['name'] as String,
-                    count: 0,
-                    color: filter['id'] == 0
-                        ? AppColors.foreground
-                        : AppColors.mutedGrey,
-                  );
-                  return CategoryChip(
-                    category: category,
-                    selected: _selectedCategoryId == filter['id'],
-                    onTap: () => _onCategorySelected(filter['id'] as int),
-                  );
-                },
+            SliverToBoxAdapter(
+              child: Container(
+                height: 56,
+                color: AppColors.background,
+                padding: const EdgeInsets.only(bottom: 8),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  itemCount: _topFilters.length,
+                  itemBuilder: (context, index) {
+                    final filter = _topFilters[index];
+                    final category = WpCategory(
+                      id: filter['id'] as int,
+                      name: filter['name'] as String,
+                      count: 0,
+                      color: filter['id'] == 0
+                          ? AppColors.primaryGreen
+                          : AppColors.mutedGrey,
+                    );
+                    return CategoryChip(
+                      category: category,
+                      selected: _selectedCategoryId == filter['id'],
+                      onTap: () => _onCategorySelected(filter['id'] as int),
+                    );
+                  },
+                ),
               ),
             ),
             // Feed
-            Expanded(
-              child: _error != null && _posts.isEmpty
-                  ? _buildError()
-                  : _posts.isEmpty && _isLoading
-                      ? ListView.builder(
-                          itemCount: 5,
-                          itemBuilder: (_, __) => const ShimmerCard(),
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(bottom: 24),
-                          itemCount: _posts.length + (_hasMore ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index >= _posts.length) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.foreground,
-                                  ),
-                                ),
-                              );
-                            }
-                            final post = _posts[index];
-                            return ArticleCard(
-                              post: post,
-                              onTap: () => _openArticle(post),
-                            );
-                          },
-                        ),
-            ),
+            _buildFeed(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFeed() {
+    if (_error != null && _posts.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: _buildError(),
+      );
+    }
+
+    if (_posts.isEmpty && _isLoading) {
+      return SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (_, __) => const ShimmerCard(),
+          childCount: 5,
+        ),
+      );
+    }
+
+    if (_posts.isEmpty) {
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: Text(
+            'Inga inlägg hittades.',
+            style: TextStyle(color: AppColors.foregroundMuted),
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (index >= _posts.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.foreground,
+                ),
+              ),
+            );
+          }
+          final post = _posts[index];
+          return ArticleCard(
+            post: post,
+            onTap: () => _openArticle(post),
+          );
+        },
+        childCount: _posts.length + (_hasMore ? 1 : 0),
       ),
     );
   }
@@ -216,25 +298,40 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildError() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.white54, size: 48),
-            const SizedBox(height: 16),
+            Icon(Icons.cloud_off_outlined, color: AppColors.grey500, size: 56),
+            const SizedBox(height: 20),
             Text(
-              'Kunde inte ladda inlägg.\nKontrollera din internetanslutning.',
+              'Kunde inte ladda inlägg',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.grey400),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.foreground,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
+            const SizedBox(height: 8),
+            const Text(
+              'Kontrollera att du har internetanslutning. '
+              'Observera att webb-versionen kan blockeras av CORS vid körning från localhost.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.foregroundMuted, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
               onPressed: () => _loadPosts(refresh: true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.surface,
-                foregroundColor: AppColors.foreground,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('Försök igen'),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Försök igen'),
             ),
           ],
         ),
