@@ -1,10 +1,8 @@
-/// # Videospelare för HTML-innehåll
-///
-/// Spelar upp self-hostade MP4-videor från Dumpens WordPress-inlägg.
-/// Används tillsammans med [flutter_html] för att rendera `<video>`-taggar.
+/// # Videospelare — omarbetad med nya färger
 library;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 
 import '../constants/app_colors.dart';
@@ -42,13 +40,9 @@ class _HtmlVideoPlayerState extends State<HtmlVideoPlayer> {
       _controller = controller;
       await controller.initialize();
       controller.setLooping(false);
-      if (mounted) {
-        setState(() => _isReady = true);
-      }
+      if (mounted) setState(() => _isReady = true);
     } catch (_) {
-      if (mounted) {
-        setState(() => _hasError = true);
-      }
+      if (mounted) setState(() => _hasError = true);
     }
   }
 
@@ -63,7 +57,6 @@ class _HtmlVideoPlayerState extends State<HtmlVideoPlayer> {
     if (_hasError || _controller == null) {
       return _buildPlaceholder(Icons.error_outline, 'Videon kunde inte laddas');
     }
-
     if (!_isReady) {
       return _buildPlaceholder(Icons.play_circle_outline, 'Laddar video...');
     }
@@ -99,17 +92,17 @@ class _HtmlVideoPlayerState extends State<HtmlVideoPlayer> {
       margin: const EdgeInsets.symmetric(vertical: 12),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.grey500),
+          Icon(icon, color: AppColors.foregroundDark),
           const SizedBox(width: 12),
           Text(
             text,
-            style: const TextStyle(color: AppColors.foregroundMuted),
+            style: GoogleFonts.jost(color: AppColors.foregroundMuted),
           ),
         ],
       ),
@@ -165,12 +158,12 @@ class _VideoControlsState extends State<_VideoControls> {
               width: 56,
               height: 56,
               decoration: const BoxDecoration(
-                color: AppColors.primaryGreen,
+                color: AppColors.accentYellow,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 isPlaying ? Icons.pause : Icons.play_arrow,
-                color: Colors.white,
+                color: Colors.black,
                 size: 32,
               ),
             ),

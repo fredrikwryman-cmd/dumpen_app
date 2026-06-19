@@ -1,11 +1,11 @@
 /// # Swish-banner
 ///
-/// En grön banner som visas längst ner i varje artikel och på Stöd-skärmen.
-/// Innehåller Swish-numret och en knapp för att kopiera det.
+/// Gul banner (matchar Dumpens accentfärg) med Swish-nummer och kopiera-knapp.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_constants.dart';
@@ -22,47 +22,53 @@ class SwishBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 16),
-      padding: EdgeInsets.all(compact ? 12 : 20),
+      padding: EdgeInsets.all(compact ? 14 : 20),
       decoration: BoxDecoration(
-        color: AppColors.primaryGreen,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.accentYellow,
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.volunteer_activism, color: Colors.white),
+              Icon(Icons.volunteer_activism, color: Colors.black, size: compact ? 20 : 24),
               const SizedBox(width: 8),
               Text(
                 'Stöd Dumpens arbete',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: GoogleFonts.jost(
+                  color: Colors.black,
+                  fontSize: compact ? 16 : 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Swisha till:',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontSize: compact ? 14 : 16,
-            ),
-          ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                swishNumber,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: compact ? 22 : 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Swisha till:',
+                    style: GoogleFonts.jost(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      fontSize: compact ? 13 : 14,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    swishNumber,
+                    style: GoogleFonts.jost(
+                      color: Colors.black,
+                      fontSize: compact ? 22 : 26,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
               IconButton(
                 onPressed: () async {
@@ -71,14 +77,17 @@ class SwishBanner extends StatelessWidget {
                   );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Swish-numret kopierat'),
-                        duration: Duration(seconds: 2),
+                      SnackBar(
+                        content: Text(
+                          'Swish-numret kopierat',
+                          style: GoogleFonts.jost(),
+                        ),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   }
                 },
-                icon: const Icon(Icons.copy, color: Colors.white),
+                icon: const Icon(Icons.copy, color: Colors.black),
                 tooltip: 'Kopiera Swish-nummer',
               ),
             ],

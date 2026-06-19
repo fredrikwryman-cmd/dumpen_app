@@ -1,11 +1,11 @@
-/// # Stöd-skärm
+/// # Stöd-skärm — professionell redesign
 ///
-/// Visar Swish-nummer, QR-kod för betalning, fakta om Dumpen och knappar
-/// för att kopiera nummer, öppna Swish, dela appen och besöka hemsidan.
+/// Swish-sektion med QR-kod, fakta om Dumpen, och sekundära knappar.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,9 +27,12 @@ class DonateScreen extends StatelessWidget {
     await Clipboard.setData(const ClipboardData(text: _swishNumber));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Swish-numret kopierat'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(
+            'Swish-numret kopierat',
+            style: GoogleFonts.jost(),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -43,15 +46,15 @@ class DonateScreen extends StatelessWidget {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          title: const Text(
+          backgroundColor: AppColors.surfaceElevated,
+          title: Text(
             'Swish saknas',
-            style: TextStyle(color: AppColors.foreground),
+            style: GoogleFonts.jost(color: AppColors.foreground),
           ),
-          content: const Text(
+          content: Text(
             'Det verkar som att Swish-appen inte är installerad på den här enheten. '
             'Du kan kopiera numret och öppna Swish manuellt istället.',
-            style: TextStyle(color: AppColors.foreground),
+            style: GoogleFonts.jost(color: AppColors.foreground),
           ),
           actions: [
             TextButton(
@@ -84,14 +87,14 @@ class DonateScreen extends StatelessWidget {
           SliverAppBar(
             floating: true,
             pinned: true,
-            backgroundColor: AppColors.background.withValues(alpha: 0.95),
+            backgroundColor: AppColors.surface,
             elevation: 0,
-            title: const Text(
+            title: Text(
               'STÖD DUMPEN',
-              style: TextStyle(
+              style: GoogleFonts.jost(
                 color: AppColors.foreground,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
                 fontSize: 18,
               ),
             ),
@@ -109,49 +112,70 @@ class DonateScreen extends StatelessWidget {
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: AppColors.border),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
-                        const Icon(
-                          Icons.volunteer_activism,
-                          color: AppColors.primaryGreen,
-                          size: 52,
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: AppColors.accentYellow,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.volunteer_activism,
+                            color: Colors.black,
+                            size: 32,
+                          ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         Text(
                           'Swisha till Dumpen',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: AppColors.foreground,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: GoogleFonts.jost(
+                            color: AppColors.foreground,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
+                        Text(
                           'Ditt stöd gör skillnad',
-                          style: TextStyle(color: AppColors.foregroundMuted),
+                          style: GoogleFonts.jost(
+                            color: AppColors.foregroundMuted,
+                            fontSize: 14,
+                          ),
                         ),
                         const SizedBox(height: 24),
+                        // Swish-nummer
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 28,
                             vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.background,
+                            color: AppColors.surfaceElevated,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppColors.border),
                           ),
-                          child: const Text(
+                          child: Text(
                             _swishNumber,
-                            style: TextStyle(
+                            style: GoogleFonts.jost(
                               color: AppColors.foreground,
-                              fontSize: 34,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 1,
                             ),
                           ),
                         ),
                         const SizedBox(height: 24),
+                        // QR-kod
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -166,6 +190,7 @@ class DonateScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        // Knappar
                         Row(
                           children: [
                             Expanded(
@@ -190,8 +215,8 @@ class DonateScreen extends StatelessWidget {
                                 icon: const Icon(Icons.payment),
                                 label: const Text('Öppna Swish'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryGreen,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.accentYellow,
+                                  foregroundColor: Colors.black,
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -204,8 +229,8 @@ class DonateScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Kräver att Swish-appen är installerad.',
-                          style: TextStyle(
-                            color: AppColors.grey500,
+                          style: GoogleFonts.jost(
+                            color: AppColors.foregroundDark,
                             fontSize: 12,
                           ),
                         ),
@@ -216,17 +241,18 @@ class DonateScreen extends StatelessWidget {
 
                   // Fakta om Dumpen
                   Text(
-                    'Om Dumpen',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.foreground,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    'OM DUMPEN',
+                    style: GoogleFonts.jost(
+                      color: AppColors.foreground,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   const _FactCard(
                     icon: Icons.people,
-                    text:
-                        'Barnrättsrörelse ledd av Sara Nilsson & Patrik Sjöberg.',
+                    text: 'Barnrättsrörelse ledd av Sara Nilsson & Patrik Sjöberg.',
                   ),
                   const _FactCard(
                     icon: Icons.gavel,
@@ -296,18 +322,18 @@ class _FactCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primaryGreen, size: 24),
+          Icon(icon, color: AppColors.accentYellow, size: 24),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: GoogleFonts.jost(
                 color: AppColors.foreground,
                 fontSize: 15,
                 height: 1.4,

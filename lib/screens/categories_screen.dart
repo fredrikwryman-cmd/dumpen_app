@@ -1,10 +1,10 @@
-/// # Kategorilista
+/// # Kategorilista — professionell redesign
 ///
-/// Visar alla Dumpens kategorier som färgkodade kort. Sökfiltrering överst
-/// och navigering till filtrerad feed vid klick.
+/// Sida med alla kategorier i ett rutnät. Sökfiltrering överst.
 library;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 import '../models/post.dart';
@@ -43,7 +43,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Future<void> _loadCategories() async {
     try {
       final categories = await _api.fetchCategories();
-      // Sortera efter inläggsantal fallande så de största kategorierna syns först.
       categories.sort((a, b) => b.count.compareTo(a.count));
       if (mounted) {
         setState(() {
@@ -88,14 +87,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           SliverAppBar(
             floating: true,
             pinned: true,
-            backgroundColor: AppColors.background.withValues(alpha: 0.95),
+            backgroundColor: AppColors.surface,
             elevation: 0,
-            title: const Text(
+            title: Text(
               'KATEGORIER',
-              style: TextStyle(
+              style: GoogleFonts.jost(
                 color: AppColors.foreground,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
                 fontSize: 18,
               ),
             ),
@@ -106,11 +105,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
-                style: const TextStyle(color: AppColors.foreground),
+                style: GoogleFonts.jost(color: AppColors.foreground),
                 decoration: InputDecoration(
                   hintText: 'Sök kategori...',
-                  hintStyle: TextStyle(color: AppColors.grey500),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                  hintStyle: GoogleFonts.jost(color: AppColors.foregroundDark),
+                  prefixIcon: const Icon(Icons.search, color: AppColors.foregroundDark),
                   filled: true,
                   fillColor: AppColors.surface,
                   border: OutlineInputBorder(
@@ -131,7 +130,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     if (_isLoading) {
       return const SliverFillRemaining(
         hasScrollBody: false,
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: CircularProgressIndicator(color: AppColors.accentYellow)),
       );
     }
 
@@ -149,19 +148,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       );
     }
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final category = _filtered[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: _CategoryCard(
-              category: category,
-              onTap: () => _openCategory(category),
-            ),
-          );
-        },
-        childCount: _filtered.length,
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final category = _filtered[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _CategoryCard(
+                category: category,
+                onTap: () => _openCategory(category),
+              ),
+            );
+          },
+          childCount: _filtered.length,
+        ),
       ),
     );
   }
@@ -173,28 +175,33 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.cloud_off_outlined, color: AppColors.grey500, size: 56),
+            Icon(Icons.cloud_off_outlined,
+                color: AppColors.foregroundDark, size: 56),
             const SizedBox(height: 20),
             Text(
               'Kunde inte ladda kategorier',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.foreground,
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: GoogleFonts.jost(
+                color: AppColors.foreground,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Kontrollera din internetanslutning och försök igen.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.foregroundMuted, height: 1.5),
+              style: GoogleFonts.jost(
+                color: AppColors.foregroundMuted,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: _loadCategories,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primaryGreen,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.accentYellow,
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -214,12 +221,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, color: AppColors.grey600, size: 56),
+          Icon(Icons.search_off, color: AppColors.foregroundDark, size: 56),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Inga kategorier matchade sökningen.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.foregroundMuted),
+            style: GoogleFonts.jost(color: AppColors.foregroundMuted),
           ),
         ],
       ),
@@ -237,34 +244,27 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
+      elevation: 1,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
       child: InkWell(
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.border),
-            gradient: LinearGradient(
-              colors: [
-                AppColors.surface,
-                AppColors.surface,
-                category.color.withValues(alpha: 0.08),
-              ],
-              stops: const [0.0, 0.7, 1.0],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
           ),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           child: Row(
             children: [
+              // Kategorifärg — vertikal accentlinje
               Container(
-                width: 12,
-                height: 12,
+                width: 4,
+                height: 40,
                 decoration: BoxDecoration(
                   color: category.color,
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(width: 16),
@@ -274,23 +274,27 @@ class _CategoryCard extends StatelessWidget {
                   children: [
                     Text(
                       category.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.foreground,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: GoogleFonts.jost(
+                        color: AppColors.foreground,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${category.count} inlägg',
-                      style: TextStyle(color: AppColors.grey500),
+                      style: GoogleFonts.jost(
+                        color: AppColors.foregroundDark,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                color: AppColors.grey500,
-                size: 18,
+                color: AppColors.foregroundDark,
+                size: 16,
               ),
             ],
           ),

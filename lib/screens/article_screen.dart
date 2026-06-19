@@ -1,12 +1,14 @@
-/// # Artikelvisning
+/// # Artikelvisning — professionell redesign
 ///
-/// Visar en enskild artikel med hero-bild, titel, metadata, HTML-brödtext,
-/// inbäddade videor, Swish-banner, dela-knapp och öppna-i-webbläsare-knapp.
+/// Hero-bild med gradient overlay, kategori-badge, titel, metadata,
+/// HTML-brödtext med Noto Serif, inbäddade videor, Swish-banner.
 library;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,7 +18,6 @@ import '../constants/app_colors.dart';
 import '../models/post.dart';
 import '../services/wordpress_api.dart';
 import '../widgets/html_video_player.dart';
-import '../widgets/shimmer_card.dart';
 import '../widgets/swish_banner.dart';
 
 class ArticleScreen extends StatefulWidget {
@@ -80,19 +81,16 @@ class _ArticleScreenState extends State<ArticleScreen> {
     }
   }
 
-  /// Extraherar videokällor ur HTML-innehåll.
   List<String> _extractVideoUrls(String html) {
     final document = html_parser.parse(html);
     final videos = document.querySelectorAll('video');
     final urls = <String>[];
     for (final video in videos) {
-      // 1. Direkt src på <video>
       final directSrc = video.attributes['src'];
       if (directSrc != null && directSrc.isNotEmpty) {
         urls.add(directSrc);
         continue;
       }
-      // 2. <source src="...">
       final source = video.querySelector('source');
       final sourceSrc = source?.attributes['src'];
       if (sourceSrc != null && sourceSrc.isNotEmpty) {
@@ -102,8 +100,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
     return urls;
   }
 
-  /// Tar bort ursprungliga <video>-taggar ur HTML så att vi kan rendera dem
-  /// separat på ett kontrollerat sätt.
   String _stripVideoTags(String html) {
     final document = html_parser.parse(html);
     document.querySelectorAll('video').forEach((e) => e.remove());
@@ -113,13 +109,17 @@ class _ArticleScreenState extends State<ArticleScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
           child: Column(
             children: [
-              ShimmerCard(),
-              Expanded(child: Center(child: CircularProgressIndicator())),
+              const _ShimmerHero(),
+              Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.accentYellow),
+                ),
+              ),
             ],
           ),
         ),
@@ -127,49 +127,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
     }
 
     if (_error != null || _post == null) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: AppColors.foreground),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.cloud_off_outlined, color: AppColors.grey500, size: 56),
-              const SizedBox(height: 20),
-              Text(
-                'Kunde inte ladda artikeln.',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.foreground,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Kontrollera din internetanslutning.',
-                style: TextStyle(color: AppColors.foregroundMuted),
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _loadPost,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primaryGreen,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Försök igen'),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildError();
     }
 
     final post = _post!;
@@ -182,193 +140,338 @@ class _ArticleScreenState extends State<ArticleScreen> {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
+          // App bar
           SliverAppBar(
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.surface,
             elevation: 0,
             pinned: true,
             iconTheme: const IconThemeData(color: AppColors.foreground),
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
             actions: [
               IconButton(
-                icon: const Icon(Icons.share, color: AppColors.foreground),
+                icon: const Icon(Icons.share_outlined, color: AppColors.foreground),
                 tooltip: 'Dela artikel',
                 onPressed: _shareArticle,
               ),
               IconButton(
-                icon: const Icon(Icons.open_in_browser, color: AppColors.foreground),
+                icon: const Icon(Icons.open_in_browser_outlined,
+                    color: AppColors.foreground),
                 tooltip: 'Öppna i webbläsare',
                 onPressed: _openInBrowser,
               ),
             ],
           ),
+          // Hero-bild med overlay
+          if (heroImage != null && heroImage.isNotEmpty)
+            SliverToBoxAdapter(child: _buildHeroImage(post, heroImage)),
+          // Artikel-innehåll
           SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Hero-bild
-                if (heroImage != null && heroImage.isNotEmpty)
-                  AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: CachedNetworkImage(
-                      imageUrl: heroImage,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: AppColors.grey900,
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: AppColors.grey900,
-                        child: const Center(
-                          child: Icon(
-                            Icons.broken_image,
-                            color: Colors.white54,
-                            size: 48,
-                          ),
-                        ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Kategori-badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: post.categoryColor,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      post.categoryLabel.toUpperCase(),
+                      style: GoogleFonts.jost(
+                        color: post.categoryTextColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
                       ),
                     ),
                   ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Kategori-badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: post.categoryColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: post.categoryColor, width: 1),
-                        ),
-                        child: Text(
-                          post.categoryLabel.toUpperCase(),
-                          style: TextStyle(
-                            color: post.categoryColor,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Titel
-                      Text(
-                        post.title,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: AppColors.foreground,
-                                  fontWeight: FontWeight.bold,
-                                  height: 1.2,
-                                ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Metadata
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.person_outline,
-                            size: 16,
-                            color: AppColors.grey500,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              post.authorName,
-                              style: TextStyle(color: AppColors.grey500),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: AppColors.grey500,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${post.readingTimeMinutes} min läsning',
-                            style: TextStyle(color: AppColors.grey500),
-                          ),
-                          const SizedBox(width: 20),
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 16,
-                            color: AppColors.grey500,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            dateFormat.format(post.date),
-                            style: TextStyle(color: AppColors.grey500),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      // Videor
-                      if (videoUrls.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              videoUrls.length == 1 ? 'Video' : 'Videor',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: AppColors.foreground,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...videoUrls.map(
-                              (url) => HtmlVideoPlayer(videoUrl: url),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      // HTML-innehåll
-                      Html(
-                        data: articleHtml,
-                        style: {
-                          'body': Style(
-                            color: AppColors.foreground,
-                            fontSize: FontSize(16),
-                            lineHeight: const LineHeight(1.6),
-                          ),
-                          'a': Style(
-                            color: AppColors.linkBlue,
-                            textDecoration: TextDecoration.underline,
-                          ),
-                          'img': Style(
-                            width: Width(100, Unit.percent),
-                            height: Height.auto(),
-                          ),
-                        },
-                        onLinkTap: (url, _, __) async {
-                          if (url == null || url.isEmpty) return;
-                          final uri = Uri.parse(url);
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(
-                              uri,
-                              mode: LaunchMode.externalApplication,
-                            );
-                          }
-                        },
-                      ),
-                      const SwishBanner(compact: true),
-                    ],
+                  const SizedBox(height: 16),
+                  // Titel
+                  Text(
+                    post.title,
+                    style: GoogleFonts.jost(
+                      color: AppColors.foreground,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  // Metadata-rad
+                  _buildMetadataRow(post, dateFormat),
+                  const SizedBox(height: 24),
+                  // Divider
+                  Container(height: 1, color: AppColors.border),
+                  const SizedBox(height: 24),
+                  // Videor
+                  if (videoUrls.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          videoUrls.length == 1 ? 'VIDEO' : 'VIDEOR',
+                          style: GoogleFonts.jost(
+                            color: AppColors.foreground,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...videoUrls.map(
+                          (url) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: HtmlVideoPlayer(videoUrl: url),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  // Brödtext (HTML)
+                  Html(
+                    data: articleHtml,
+                    style: {
+                      'body': Style(
+                        color: AppColors.foreground,
+                        fontSize: FontSize(16),
+                        lineHeight: const LineHeight(1.7),
+                        fontFamily: GoogleFonts.notoSerif().fontFamily,
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                      ),
+                      'p': Style(
+                        margin: Margins.only(bottom: 16),
+                      ),
+                      'a': Style(
+                        color: AppColors.linkBlue,
+                        textDecoration: TextDecoration.underline,
+                      ),
+                      'img': Style(
+                        width: Width(100, Unit.percent),
+                        height: Height.auto(),
+                      ),
+                      'h1': Style(
+                        color: AppColors.foreground,
+                        fontSize: FontSize(24),
+                        fontWeight: FontWeight.w700,
+                        margin: Margins.only(top: 24, bottom: 12),
+                      ),
+                      'h2': Style(
+                        color: AppColors.foreground,
+                        fontSize: FontSize(20),
+                        fontWeight: FontWeight.w700,
+                        margin: Margins.only(top: 20, bottom: 10),
+                      ),
+                      'h3': Style(
+                        color: AppColors.foreground,
+                        fontSize: FontSize(18),
+                        fontWeight: FontWeight.w600,
+                        margin: Margins.only(top: 16, bottom: 8),
+                      ),
+                      'blockquote': Style(
+                        margin: Margins.symmetric(vertical: 16),
+                        padding: HtmlPaddings.only(left: 16),
+                        border: Border(
+                          left: BorderSide(
+                            color: AppColors.accentYellow,
+                            width: 3,
+                          ),
+                        ),
+                        color: AppColors.foregroundMuted,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    },
+                    onLinkTap: (url, _, __) async {
+                      if (url == null || url.isEmpty) return;
+                      final uri = Uri.parse(url);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  // Swish-banner
+                  const SwishBanner(compact: true),
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Hero-bild
+  // ---------------------------------------------------------------------------
+
+  Widget _buildHeroImage(WpPost post, String imageUrl) {
+    return Stack(
+      children: [
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            placeholder: (_, __) => Container(color: AppColors.surfaceLight),
+            errorWidget: (_, __, ___) => Container(
+              color: AppColors.surfaceLight,
+              child: const Center(
+                child: Icon(Icons.broken_image, color: Colors.grey, size: 48),
+              ),
+            ),
+          ),
+        ),
+        // Gradient längst ner för smidig övergång
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 80,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  AppColors.background.withValues(alpha: 0.8),
+                  AppColors.background,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Metadata-rad
+  // ---------------------------------------------------------------------------
+
+  Widget _buildMetadataRow(WpPost post, DateFormat dateFormat) {
+    return Row(
+      children: [
+        // Författare
+        Icon(Icons.person_outline, size: 16, color: AppColors.foregroundDark),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            post.authorName,
+            style: GoogleFonts.jost(
+              color: AppColors.foregroundMuted,
+              fontSize: 13,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        // Lästid
+        Icon(Icons.access_time, size: 16, color: AppColors.foregroundDark),
+        const SizedBox(width: 6),
+        Text(
+          post.readingTimeLabel,
+          style: GoogleFonts.jost(
+            color: AppColors.foregroundMuted,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(width: 16),
+        // Datum
+        Icon(Icons.calendar_today_outlined,
+            size: 16, color: AppColors.foregroundDark),
+        const SizedBox(width: 6),
+        Text(
+          dateFormat.format(post.date),
+          style: GoogleFonts.jost(
+            color: AppColors.foregroundMuted,
+            fontSize: 13,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Felmeddelande
+  // ---------------------------------------------------------------------------
+
+  Widget _buildError() {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.foreground),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_off_outlined,
+                  color: AppColors.foregroundDark, size: 56),
+              const SizedBox(height: 20),
+              Text(
+                'Kunde inte ladda artikeln.',
+                style: GoogleFonts.jost(
+                  color: AppColors.foreground,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Kontrollera din internetanslutning.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.jost(
+                  color: AppColors.foregroundMuted,
+                ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _loadPost,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.accentYellow,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Försök igen'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Shimmer-hero placeholder
+// -----------------------------------------------------------------------------
+
+class _ShimmerHero extends StatelessWidget {
+  const _ShimmerHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Container(color: AppColors.surfaceLight),
     );
   }
 }

@@ -1,38 +1,13 @@
 /// # Data models för Dumpens WordPress REST API
 ///
 /// Innehåller klasserna [WpPost], [WpCategory] och [WpMedia] med
-/// `fromJson`-konstruktorer som hanterar Dumpens specifika API-svar,
-/// inklusive fallback för författare (som ger 404 från author-embed).
+/// `fromJson`-konstruktorer som hanterar Dumpens specifika API-svar.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-
-// ---------------------------------------------------------------------------
-// Kategorikonfiguration — färg och namn för de kategorier som appen exponerar.
-// ---------------------------------------------------------------------------
-
-const Map<int, Map<String, String>> _categoryConfig = {
-  11: {'name': 'Hall of shame', 'color': '#8c2a2a'},
-  6: {'name': 'Krönika', 'color': '#2563eb'},
-  43: {'name': 'Krönikor', 'color': '#2563eb'},
-  26: {'name': 'Videos från gäddfiske', 'color': '#7c3aed'},
-  60: {'name': 'Böcker och media om sexuella övergrepp mot barn', 'color': '#ea580c'},
-  42: {'name': 'Mikaelas hörna', 'color': '#ec4899'},
-  22: {'name': 'Ansvarig utgivare', 'color': '#6b7280'},
-  1: {'name': 'Patriks Hörna', 'color': '#1e40af'},
-  62: {'name': 'Föreningen Dumpen', 'color': '#16a34a'},
-  29: {'name': 'Rättsbevakning', 'color': '#4338ca'},
-};
-
-/// Returnerar en [Color] från en hex-sträng i formatet `#rrggbb`.
-Color _colorFromHex(String hex) {
-  final buffer = StringBuffer();
-  if (hex.length == 7) buffer.write('ff');
-  buffer.write(hex.replaceFirst('#', ''));
-  return Color(int.parse(buffer.toString(), radix: 16));
-}
+import '../constants/app_styles.dart';
 
 // ---------------------------------------------------------------------------
 // WpCategory
@@ -42,23 +17,27 @@ class WpCategory {
   final int id;
   final String name;
   final int count;
-  final Color color;
+  final int colorIndex;
 
   const WpCategory({
     required this.id,
     required this.name,
     required this.count,
-    required this.color,
+    required this.colorIndex,
   });
+
+  Color get color => AppColors.categoryColor(colorIndex);
+  Color get textColor => AppColors.categoryTextColor(colorIndex);
 
   factory WpCategory.fromJson(Map<String, dynamic> json) {
     final id = json['id'] as int? ?? 0;
-    final config = _categoryConfig[id];
+    final override = kCategoryOverrideNames[id];
+    final colorIdx = kCategoryColorIndex[id] ?? -1;
     return WpCategory(
       id: id,
-      name: config?['name'] ?? (json['name'] as String? ?? 'Okänd kategori'),
+      name: override ?? (json['name'] as String? ?? 'Okänd kategori'),
       count: json['count'] as int? ?? 0,
-      color: _colorFromHex(config?['color'] ?? '#6b7280'),
+      colorIndex: colorIdx,
     );
   }
 
@@ -88,8 +67,6 @@ class WpMedia {
     );
   }
 
-  /// Hämtar bild-URL för önskad storlek. Fall tillbaka på `sourceUrl`
-  /// om storleken inte finns.
   String? urlForSize(String size) {
     final sizes = mediaDetails?['sizes'] as Map<String, dynamic>?;
     final sized = sizes?[size] as Map<String, dynamic>?;
@@ -100,7 +77,7 @@ class WpMedia {
   String? get chromenewsLarge => urlForSize('chromenews-large');
   String? get full => sourceUrl;
 
-  /// Bästa feed-bild: medium_large, annars chromenews-large, annars full.
+  /// Bästa feed-bild: medium_large → chromenews-large → full.
   String? get feedUrl => mediumLarge ?? chromenewsLarge ?? full;
 }
 
@@ -142,15 +119,11 @@ class WpPost {
       }
     }
 
-    // Author-embed returnerar 404 på Dumpen.se; använd sparad/cachad
-    // författare om den finns, annars kategoribaserad fallback.
     final cachedAuthor = json['author_name'] as String?;
     final authorName =
         cachedAuthor?.isNotEmpty == true ? cachedAuthor! : _resolveAuthorName(categories);
 
     final renderedContent = _rendered(json['content']);
-
-    // Läs cached lästid om den finns, annars räkna om från innehållet.
     final cachedReadingTime = json['reading_time_minutes'] as int?;
     final readingTimeMinutes = cachedReadingTime ?? _estimateReadingTime(renderedContent);
 
@@ -180,28 +153,34 @@ class WpPost {
         'reading_time_minutes': readingTimeMinutes,
       };
 
-  /// Den dominerande kategorin för ett inlägg (den första från konfigurationen).
-  /// Används för badge-färg och kategorinamn.
-  WpCategory? get primaryCategory {
+  /// Kategorifärg för den dominerande kategorin.
+  int get primaryColorIndex {
     for (final id in categories) {
-      final config = _categoryConfig[id];
-      if (config != null) {
-        return WpCategory(
-          id: id,
-          name: config['name']!,
-          count: 0,
-          color: _colorFromHex(config['color']!),
-        );
-      }
+      final idx = kCategoryColorIndex[id];
+      if (idx != null && idx >= 0) return idx;
     }
-    return null;
+    return 4; // fallback grön
   }
 
-  /// Första bästa konfigurerade kategorinamn, eller generisk etikett.
-  String get categoryLabel => primaryCategory?.name ?? 'Dumpen';
+  Color get categoryColor => AppColors.categoryColor(primaryColorIndex);
+  Color get categoryTextColor => AppColors.categoryTextColor(primaryColorIndex);
 
-  /// Accentfärg för inläggets kategori.
-  Color get categoryColor => primaryCategory?.color ?? AppColors.mutedGrey;
+  String get categoryLabel => kCategoryOverrideNames[categories.first] ?? 'Dumpen';
+
+  String get readingTimeLabel => '$readingTimeMinutes min läsning';
+
+  /// Finns en featured-bild?
+  bool get hasImage => featuredMedia?.feedUrl != null && featuredMedia!.feedUrl!.isNotEmpty;
+
+  /// Rensad excerpt (HTML-taggar borta) — max [maxChars] tecken.
+  String get plainExcerpt {
+    final plain = excerpt
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .trim();
+    return plain;
+  }
 
   // -------------------------------------------------------------------------
   // Hjälpare
@@ -227,7 +206,7 @@ class WpPost {
   static String _resolveAuthorName(List<int> categories) {
     if (categories.contains(42)) return 'Mikaela';
     if (categories.contains(1)) return 'Patrik Sjöberg';
-    return 'Sara Nilsson & Patrik Sjöberg';
+    return 'Redaktör Dumpen';
   }
 
   static int _estimateReadingTime(String html) {

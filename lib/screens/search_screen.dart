@@ -1,17 +1,16 @@
-/// # Sökskärm
-///
-/// Låter användaren söka bland Dumpens artiklar via WordPress REST API.
-/// Visar resultat i samma stil som feeden med pull-to-refresh,
-/// oändlig scroll och ett tydligt tomt tillstånd.
+/// # Sökskärm — professionell redesign
 library;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../constants/app_colors.dart';
 import '../models/post.dart';
 import '../services/wordpress_api.dart';
-import '../widgets/article_card.dart';
-import '../widgets/shimmer_card.dart';
 import 'article_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -115,9 +114,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _openArticle(WpPost post) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ArticleScreen(postId: post.id),
-      ),
+      MaterialPageRoute(builder: (_) => ArticleScreen(postId: post.id)),
     );
   }
 
@@ -126,9 +123,10 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.foreground),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         titleSpacing: 0,
         title: Padding(
           padding: const EdgeInsets.only(right: 8),
@@ -136,15 +134,15 @@ class _SearchScreenState extends State<SearchScreen> {
             controller: _controller,
             focusNode: _focusNode,
             autofocus: true,
-            style: const TextStyle(color: AppColors.foreground),
+            style: GoogleFonts.jost(color: AppColors.foreground),
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: 'Sök på Dumpen...',
-              hintStyle: TextStyle(color: AppColors.grey500),
+              hintStyle: GoogleFonts.jost(color: AppColors.foregroundDark),
               border: InputBorder.none,
               suffixIcon: _controller.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.white54),
+                      icon: const Icon(Icons.clear, color: AppColors.foregroundDark),
                       onPressed: () {
                         _controller.clear();
                         setState(() {
@@ -170,7 +168,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ],
       ),
       body: RefreshIndicator(
-        color: AppColors.foreground,
+        color: AppColors.accentYellow,
         backgroundColor: AppColors.surface,
         onRefresh: () => _performSearch(refresh: true),
         child: _buildBody(),
@@ -182,7 +180,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (_isLoading) {
       return ListView.builder(
         itemCount: 5,
-        itemBuilder: (_, __) => const ShimmerCard(),
+        itemBuilder: (_, __) => const _ShimmerListItem(),
       );
     }
 
@@ -214,14 +212,13 @@ class _SearchScreenState extends State<SearchScreen> {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Center(
-              child: CircularProgressIndicator(color: AppColors.foreground),
+              child: CircularProgressIndicator(color: AppColors.accentYellow),
             ),
           );
         }
-        final post = _results[index];
-        return ArticleCard(
-          post: post,
-          onTap: () => _openArticle(post),
+        return _SearchResultItem(
+          post: _results[index],
+          onTap: () => _openArticle(_results[index]),
         );
       },
     );
@@ -234,28 +231,33 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.cloud_off_outlined, color: AppColors.grey500, size: 56),
+            Icon(Icons.cloud_off_outlined,
+                color: AppColors.foregroundDark, size: 56),
             const SizedBox(height: 20),
             Text(
               'Något gick fel vid sökningen',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.foreground,
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: GoogleFonts.jost(
+                color: AppColors.foreground,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Kontrollera din internetanslutning och försök igen.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.foregroundMuted, height: 1.5),
+              style: GoogleFonts.jost(
+                color: AppColors.foregroundMuted,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: () => _performSearch(refresh: true),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primaryGreen,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.accentYellow,
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -275,14 +277,155 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: AppColors.grey600, size: 64),
+          Icon(icon, color: AppColors.foregroundDark, size: 64),
           const SizedBox(height: 16),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.foregroundMuted),
+            style: GoogleFonts.jost(color: AppColors.foregroundMuted),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Sökresultat-kort
+// -----------------------------------------------------------------------------
+
+class _SearchResultItem extends StatelessWidget {
+  final WpPost post;
+  final VoidCallback onTap;
+
+  const _SearchResultItem({required this.post, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('d MMM y', 'sv_SE');
+    final imageUrl = post.featuredMedia?.feedUrl;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 100,
+                  height: 75,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: imageUrl != null && imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            color: AppColors.surfaceLight,
+                            child: const Icon(Icons.image,
+                                color: Colors.grey, size: 24),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post.title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.jost(
+                          color: AppColors.foreground,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
+                        ),
+                      ),
+                      if (post.plainExcerpt.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          post.plainExcerpt,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.notoSerif(
+                            color: AppColors.foregroundMuted,
+                            fontSize: 12,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        dateFormat.format(post.date),
+                        style: GoogleFonts.jost(
+                          color: AppColors.foregroundDark,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerListItem extends StatelessWidget {
+  const _ShimmerListItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Shimmer.fromColors(
+        baseColor: AppColors.shimmerBackground,
+        highlightColor: AppColors.shimmerHighlight,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 100,
+                height: 75,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                        width: double.infinity,
+                        height: 14,
+                        color: Colors.white),
+                    const SizedBox(height: 8),
+                    Container(width: 120, height: 12, color: Colors.white),
+                    const SizedBox(height: 8),
+                    Container(width: 60, height: 10, color: Colors.white),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
