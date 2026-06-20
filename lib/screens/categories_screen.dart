@@ -4,7 +4,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 import '../models/post.dart';
@@ -91,7 +90,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             elevation: 0,
             title: Text(
               'KATEGORIER',
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,
@@ -105,10 +105,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
-                style: GoogleFonts.jost(color: AppColors.foreground),
+                style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foreground),
                 decoration: InputDecoration(
                   hintText: 'Sök kategori...',
-                  hintStyle: GoogleFonts.jost(color: AppColors.foregroundDark),
+                  hintStyle: TextStyle(fontFamily: 'sans-serif', color: AppColors.foregroundDark),
                   prefixIcon: const Icon(Icons.search, color: AppColors.foregroundDark),
                   filled: true,
                   fillColor: AppColors.surface,
@@ -181,7 +181,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             Text(
               'Kunde inte ladda kategorier',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -191,7 +192,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             Text(
               'Kontrollera din internetanslutning och försök igen.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foregroundMuted,
                 height: 1.5,
               ),
@@ -226,7 +228,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           Text(
             'Inga kategorier matchade sökningen.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.jost(color: AppColors.foregroundMuted),
+            style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foregroundMuted),
           ),
         ],
       ),
@@ -274,7 +276,8 @@ class _CategoryCard extends StatelessWidget {
                   children: [
                     Text(
                       category.name,
-                      style: GoogleFonts.jost(
+                      style: TextStyle(
+                        fontFamily: 'sans-serif',
                         color: AppColors.foreground,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -283,7 +286,8 @@ class _CategoryCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${category.count} inlägg',
-                      style: GoogleFonts.jost(
+                      style: TextStyle(
+                        fontFamily: 'sans-serif',
                         color: AppColors.foregroundDark,
                         fontSize: 13,
                       ),

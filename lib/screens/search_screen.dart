@@ -3,7 +3,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -134,11 +133,11 @@ class _SearchScreenState extends State<SearchScreen> {
             controller: _controller,
             focusNode: _focusNode,
             autofocus: true,
-            style: GoogleFonts.jost(color: AppColors.foreground),
+            style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foreground),
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: 'Sök på Dumpen...',
-              hintStyle: GoogleFonts.jost(color: AppColors.foregroundDark),
+              hintStyle: TextStyle(fontFamily: 'sans-serif', color: AppColors.foregroundDark),
               border: InputBorder.none,
               suffixIcon: _controller.text.isNotEmpty
                   ? IconButton(
@@ -237,7 +236,8 @@ class _SearchScreenState extends State<SearchScreen> {
             Text(
               'Något gick fel vid sökningen',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -247,7 +247,8 @@ class _SearchScreenState extends State<SearchScreen> {
             Text(
               'Kontrollera din internetanslutning och försök igen.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foregroundMuted,
                 height: 1.5,
               ),
@@ -282,7 +283,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: GoogleFonts.jost(color: AppColors.foregroundMuted),
+            style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foregroundMuted),
           ),
         ],
       ),
@@ -346,7 +347,8 @@ class _SearchResultItem extends StatelessWidget {
                         post.title,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.jost(
+                        style: TextStyle(
+                          fontFamily: 'sans-serif',
                           color: AppColors.foreground,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -359,7 +361,8 @@ class _SearchResultItem extends StatelessWidget {
                           post.plainExcerpt,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.notoSerif(
+                          style: TextStyle(
+                            fontFamily: 'serif',
                             color: AppColors.foregroundMuted,
                             fontSize: 12,
                             height: 1.4,
@@ -369,7 +372,8 @@ class _SearchResultItem extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         dateFormat.format(post.date),
-                        style: GoogleFonts.jost(
+                        style: TextStyle(
+                          fontFamily: 'sans-serif',
                           color: AppColors.foregroundDark,
                           fontSize: 11,
                         ),

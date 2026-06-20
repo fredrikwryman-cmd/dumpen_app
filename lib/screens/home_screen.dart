@@ -5,7 +5,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -218,7 +217,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: Text(
                           hero.categoryLabel.toUpperCase(),
-                          style: GoogleFonts.jost(
+                          style: TextStyle(
+                            fontFamily: 'sans-serif',
                             color: hero.categoryTextColor,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -232,7 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         hero.title,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.jost(
+                        style: TextStyle(
+                          fontFamily: 'sans-serif',
                           color: Colors.white,
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
@@ -248,7 +249,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 4),
                           Text(
                             hero.readingTimeLabel,
-                            style: GoogleFonts.jost(
+                            style: TextStyle(
+                              fontFamily: 'sans-serif',
                               color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
@@ -259,7 +261,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 4),
                           Text(
                             DateFormat('d MMM y', 'sv_SE').format(hero.date),
-                            style: GoogleFonts.jost(
+                            style: TextStyle(
+                              fontFamily: 'sans-serif',
                               color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
@@ -324,7 +327,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: Text(
                           name,
-                          style: GoogleFonts.jost(
+                          style: TextStyle(
+                            fontFamily: 'sans-serif',
                             color: selected
                                 ? AppColors.categoryTextColor(colorIdx)
                                 : AppColors.foreground,
@@ -365,7 +369,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 10),
             Text(
               _selectedCategoryId == 0 ? 'SENASTE INLÄGG' : 'INLÄGG',
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -413,7 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Center(
           child: Text(
             'Inga inlägg hittades.',
-            style: GoogleFonts.jost(color: AppColors.foregroundMuted),
+            style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foregroundMuted),
           ),
         ),
       );
@@ -464,7 +469,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'Kunde inte ladda inlägg',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -474,7 +480,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'Kontrollera att du har internetanslutning.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foregroundMuted,
                 height: 1.5,
               ),
@@ -491,7 +498,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               icon: const Icon(Icons.refresh),
-              label: Text('Försök igen', style: GoogleFonts.jost()),
+              label: Text('Försök igen', style: TextStyle(fontFamily: 'sans-serif')),
             ),
           ],
         ),
@@ -574,7 +581,8 @@ class _ArticleListItem extends StatelessWidget {
                             ),
                             child: Text(
                               post.categoryLabel.toUpperCase(),
-                              style: GoogleFonts.jost(
+                              style: TextStyle(
+                                fontFamily: 'sans-serif',
                                 color: post.categoryTextColor,
                                 fontSize: 8,
                                 fontWeight: FontWeight.w700,
@@ -598,7 +606,8 @@ class _ArticleListItem extends StatelessWidget {
                         post.title,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.jost(
+                        style: TextStyle(
+                          fontFamily: 'sans-serif',
                           color: AppColors.foreground,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -612,7 +621,8 @@ class _ArticleListItem extends StatelessWidget {
                           post.plainExcerpt,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.notoSerif(
+                          style: TextStyle(
+                            fontFamily: 'serif',
                             color: AppColors.foregroundMuted,
                             fontSize: 13,
                             height: 1.4,
@@ -628,7 +638,8 @@ class _ArticleListItem extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             post.readingTimeLabel,
-                            style: GoogleFonts.jost(
+                            style: TextStyle(
+                              fontFamily: 'sans-serif',
                               color: AppColors.foregroundDark,
                               fontSize: 11,
                             ),
@@ -639,7 +650,8 @@ class _ArticleListItem extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             dateFormat.format(post.date),
-                            style: GoogleFonts.jost(
+                            style: TextStyle(
+                              fontFamily: 'sans-serif',
                               color: AppColors.foregroundDark,
                               fontSize: 11,
                             ),

@@ -7,7 +7,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -182,7 +181,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
                     ),
                     child: Text(
                       post.categoryLabel.toUpperCase(),
-                      style: GoogleFonts.jost(
+                      style: TextStyle(
+                        fontFamily: 'sans-serif',
                         color: post.categoryTextColor,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -194,7 +194,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
                   // Titel
                   Text(
                     post.title,
-                    style: GoogleFonts.jost(
+                    style: TextStyle(
+                      fontFamily: 'sans-serif',
                       color: AppColors.foreground,
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
@@ -215,7 +216,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
                       children: [
                         Text(
                           videoUrls.length == 1 ? 'VIDEO' : 'VIDEOR',
-                          style: GoogleFonts.jost(
+                          style: TextStyle(
+                            fontFamily: 'sans-serif',
                             color: AppColors.foreground,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -264,7 +266,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
                         color: AppColors.foreground,
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.7),
-                        fontFamily: GoogleFonts.notoSerif().fontFamily,
+                        fontFamily: 'serif',
                         margin: Margins.zero,
                         padding: HtmlPaddings.zero,
                       ),
@@ -392,7 +394,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
         Expanded(
           child: Text(
             post.authorName,
-            style: GoogleFonts.jost(
+            style: TextStyle(
+              fontFamily: 'sans-serif',
               color: AppColors.foregroundMuted,
               fontSize: 13,
             ),
@@ -404,7 +407,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
         const SizedBox(width: 6),
         Text(
           post.readingTimeLabel,
-          style: GoogleFonts.jost(
+          style: TextStyle(
+            fontFamily: 'sans-serif',
             color: AppColors.foregroundMuted,
             fontSize: 13,
           ),
@@ -416,7 +420,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
         const SizedBox(width: 6),
         Text(
           dateFormat.format(post.date),
-          style: GoogleFonts.jost(
+          style: TextStyle(
+            fontFamily: 'sans-serif',
             color: AppColors.foregroundMuted,
             fontSize: 13,
           ),
@@ -449,7 +454,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
               const SizedBox(height: 20),
               Text(
                 'Kunde inte ladda artikeln.',
-                style: GoogleFonts.jost(
+                style: TextStyle(
+                  fontFamily: 'sans-serif',
                   color: AppColors.foreground,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -459,7 +465,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
               Text(
                 'Kontrollera din internetanslutning.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.jost(
+                style: TextStyle(
+                  fontFamily: 'sans-serif',
                   color: AppColors.foregroundMuted,
                 ),
               ),

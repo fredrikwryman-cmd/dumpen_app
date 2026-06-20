@@ -5,8 +5,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../constants/app_colors.dart';
 
 class PikeHeader extends StatelessWidget {
@@ -77,7 +75,8 @@ class PikeHeader extends StatelessWidget {
                         const SizedBox(width: 10),
                         Text(
                           'DUMPEN',
-                          style: GoogleFonts.jost(
+                          style: TextStyle(
+                            fontFamily: 'sans-serif',
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 3,

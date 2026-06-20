@@ -7,7 +7,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'constants/app_colors.dart';
@@ -41,9 +40,7 @@ class DumpenApp extends StatelessWidget {
   }
 
   ThemeData _buildTheme() {
-    final baseTextTheme = GoogleFonts.jostTextTheme(
-      ThemeData.dark().textTheme,
-    );
+    final baseTextTheme = ThemeData.light().textTheme;
 
     return ThemeData(
       useMaterial3: true,
@@ -271,7 +268,8 @@ class _ConsentGateState extends State<_ConsentGate> {
                     const SizedBox(width: 12),
                     Text(
                       'DUMPEN',
-                      style: GoogleFonts.jost(
+                      style: TextStyle(
+                        fontFamily: 'sans-serif',
                         color: AppColors.foreground,
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -283,7 +281,8 @@ class _ConsentGateState extends State<_ConsentGate> {
                 const SizedBox(height: 32),
                 Text(
                   'Välkommen till Dumpen',
-                  style: GoogleFonts.jost(
+                  style: TextStyle(
+                    fontFamily: 'sans-serif',
                     color: AppColors.foreground,
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
@@ -294,7 +293,8 @@ class _ConsentGateState extends State<_ConsentGate> {
                   'Denna app visar innehåll från dumpen.se. Vissa artiklar '
                   'innehåller personuppgifter om brottsmisstänkta och dömda. '
                   'Genom att fortsätta godkänner du detta.',
-                  style: GoogleFonts.jost(
+                  style: TextStyle(
+                    fontFamily: 'sans-serif',
                     color: AppColors.foregroundMuted,
                     fontSize: 16,
                     height: 1.6,
@@ -312,7 +312,8 @@ class _ConsentGateState extends State<_ConsentGate> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      textStyle: GoogleFonts.jost(
+                      textStyle: TextStyle(
+                        fontFamily: 'sans-serif',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -327,7 +328,8 @@ class _ConsentGateState extends State<_ConsentGate> {
                     onPressed: () => SystemNavigator.pop(),
                     child: Text(
                       'Avbryt',
-                      style: GoogleFonts.jost(
+                      style: TextStyle(
+                        fontFamily: 'sans-serif',
                         color: AppColors.foregroundDark,
                         fontSize: 14,
                       ),

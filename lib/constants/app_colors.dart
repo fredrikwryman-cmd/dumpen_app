@@ -1,4 +1,4 @@
-/// # Färgpalett för Dumpen-appen
+/// # Färgpalett och typografi för Dumpen-appen
 ///
 /// Design baserad på dumpen.se's ChromeNews-tema.
 /// Ljust tema: ljusa ytor, mörk text, utvalda accentfärger per kategori.
@@ -6,6 +6,9 @@
 library;
 
 import 'package:flutter/material.dart';
+
+/// Appens standard-typsnitt (Jost-liknande, fungerar offline).
+const String appFontFamily = 'sans-serif';
 
 abstract final class AppColors {
   // === Basfärger (från dumpen.se — ljust tema) ===

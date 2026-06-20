@@ -5,7 +5,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -121,7 +120,8 @@ class _CategoryFeedScreenState extends State<CategoryFeedScreen> {
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(
                   widget.category.name.toUpperCase(),
-                  style: GoogleFonts.jost(
+                  style: TextStyle(
+                    fontFamily: 'sans-serif',
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.5,
@@ -169,7 +169,8 @@ class _CategoryFeedScreenState extends State<CategoryFeedScreen> {
           const SizedBox(width: 10),
           Text(
             '${_posts.length} INLÄGG',
-            style: GoogleFonts.jost(
+            style: TextStyle(
+              fontFamily: 'sans-serif',
               color: AppColors.foreground,
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -247,7 +248,8 @@ class _CategoryFeedScreenState extends State<CategoryFeedScreen> {
             Text(
               'Kunde inte ladda inlägg',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -257,7 +259,8 @@ class _CategoryFeedScreenState extends State<CategoryFeedScreen> {
             Text(
               'Kontrollera din internetanslutning och försök igen.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foregroundMuted,
                 height: 1.5,
               ),
@@ -369,7 +372,8 @@ class _ArticleListItem extends StatelessWidget {
                         post.title,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.jost(
+                        style: TextStyle(
+                          fontFamily: 'sans-serif',
                           color: AppColors.foreground,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -382,7 +386,8 @@ class _ArticleListItem extends StatelessWidget {
                           post.plainExcerpt,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.notoSerif(
+                          style: TextStyle(
+                            fontFamily: 'serif',
                             color: AppColors.foregroundMuted,
                             fontSize: 12,
                             height: 1.4,
@@ -397,7 +402,8 @@ class _ArticleListItem extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             post.readingTimeLabel,
-                            style: GoogleFonts.jost(
+                            style: TextStyle(
+                              fontFamily: 'sans-serif',
                               color: AppColors.foregroundDark,
                               fontSize: 10,
                             ),
@@ -405,7 +411,8 @@ class _ArticleListItem extends StatelessWidget {
                           const SizedBox(width: 10),
                           Text(
                             dateFormat.format(post.date),
-                            style: GoogleFonts.jost(
+                            style: TextStyle(
+                              fontFamily: 'sans-serif',
                               color: AppColors.foregroundDark,
                               fontSize: 10,
                             ),

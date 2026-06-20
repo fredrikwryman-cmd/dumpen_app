@@ -5,7 +5,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_constants.dart';
@@ -36,7 +35,8 @@ class SwishBanner extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Stöd Dumpens arbete',
-                style: GoogleFonts.jost(
+                style: TextStyle(
+                  fontFamily: 'sans-serif',
                   color: Colors.black,
                   fontSize: compact ? 16 : 18,
                   fontWeight: FontWeight.w700,
@@ -53,7 +53,8 @@ class SwishBanner extends StatelessWidget {
                 children: [
                   Text(
                     'Swisha till:',
-                    style: GoogleFonts.jost(
+                    style: TextStyle(
+                      fontFamily: 'sans-serif',
                       color: Colors.black.withValues(alpha: 0.6),
                       fontSize: compact ? 13 : 14,
                     ),
@@ -61,7 +62,8 @@ class SwishBanner extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     swishNumber,
-                    style: GoogleFonts.jost(
+                    style: TextStyle(
+                      fontFamily: 'sans-serif',
                       color: Colors.black,
                       fontSize: compact ? 22 : 26,
                       fontWeight: FontWeight.w700,
@@ -80,7 +82,7 @@ class SwishBanner extends StatelessWidget {
                       SnackBar(
                         content: Text(
                           'Swish-numret kopierat',
-                          style: GoogleFonts.jost(),
+                          style: TextStyle(fontFamily: 'sans-serif'),
                         ),
                         duration: const Duration(seconds: 2),
                       ),

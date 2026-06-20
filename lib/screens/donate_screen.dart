@@ -5,7 +5,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,7 +29,7 @@ class DonateScreen extends StatelessWidget {
         SnackBar(
           content: Text(
             'Swish-numret kopierat',
-            style: GoogleFonts.jost(),
+            style: TextStyle(fontFamily: 'sans-serif'),
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -49,12 +48,12 @@ class DonateScreen extends StatelessWidget {
           backgroundColor: AppColors.surfaceElevated,
           title: Text(
             'Swish saknas',
-            style: GoogleFonts.jost(color: AppColors.foreground),
+            style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foreground),
           ),
           content: Text(
             'Det verkar som att Swish-appen inte är installerad på den här enheten. '
             'Du kan kopiera numret och öppna Swish manuellt istället.',
-            style: GoogleFonts.jost(color: AppColors.foreground),
+            style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foreground),
           ),
           actions: [
             TextButton(
@@ -91,7 +90,8 @@ class DonateScreen extends StatelessWidget {
             elevation: 0,
             title: Text(
               'STÖD DUMPEN',
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,
@@ -138,7 +138,8 @@ class DonateScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         Text(
                           'Swisha till Dumpen',
-                          style: GoogleFonts.jost(
+                          style: TextStyle(
+                            fontFamily: 'sans-serif',
                             color: AppColors.foreground,
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
@@ -147,7 +148,8 @@ class DonateScreen extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           'Ditt stöd gör skillnad',
-                          style: GoogleFonts.jost(
+                          style: TextStyle(
+                            fontFamily: 'sans-serif',
                             color: AppColors.foregroundMuted,
                             fontSize: 14,
                           ),
@@ -166,7 +168,8 @@ class DonateScreen extends StatelessWidget {
                           ),
                           child: Text(
                             _swishNumber,
-                            style: GoogleFonts.jost(
+                            style: TextStyle(
+                              fontFamily: 'sans-serif',
                               color: AppColors.foreground,
                               fontSize: 32,
                               fontWeight: FontWeight.w700,
@@ -229,7 +232,8 @@ class DonateScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Kräver att Swish-appen är installerad.',
-                          style: GoogleFonts.jost(
+                          style: TextStyle(
+                            fontFamily: 'sans-serif',
                             color: AppColors.foregroundDark,
                             fontSize: 12,
                           ),
@@ -242,7 +246,8 @@ class DonateScreen extends StatelessWidget {
                   // Fakta om Dumpen
                   Text(
                     'OM DUMPEN',
-                    style: GoogleFonts.jost(
+                    style: TextStyle(
+                      fontFamily: 'sans-serif',
                       color: AppColors.foreground,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -333,7 +338,8 @@ class _FactCard extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.jost(
+              style: TextStyle(
+                fontFamily: 'sans-serif',
                 color: AppColors.foreground,
                 fontSize: 15,
                 height: 1.4,

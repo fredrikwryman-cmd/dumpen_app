@@ -2,7 +2,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 
 import '../constants/app_colors.dart';
@@ -102,7 +101,7 @@ class _HtmlVideoPlayerState extends State<HtmlVideoPlayer> {
           const SizedBox(width: 12),
           Text(
             text,
-            style: GoogleFonts.jost(color: AppColors.foregroundMuted),
+            style: TextStyle(fontFamily: 'sans-serif', color: AppColors.foregroundMuted),
           ),
         ],
       ),
