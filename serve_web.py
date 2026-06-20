@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Lokal server för Dumpen webapp med CORS-proxy mot dumpen.se.
+"""Lokal CORS-proxy för Dumpen webapp.
 
-Servrar filer från build/web och vidarebefordrar /wp-json/* samt
-/wp-content/* till https://dumpen.se så att appen kan köras lokalt
-utan CORS-fel, inklusive videor och bilder.
+Servrar Flutter-webappen från build/web och vidarebefordrar /proxy/*
+till https://dumpen.se med rätt User-Agent (dumpen.se blockerar requests
+utan browser UA).
 """
 
 import http.server
@@ -15,11 +15,8 @@ from pathlib import Path
 
 PORT = 8080
 BUILD_DIR = Path(__file__).parent / "build" / "web"
-API_BASE = "https://dumpen.se"
-
-
-def _is_proxy_path(path: str) -> bool:
-    return path.startswith("/wp-json/") or path.startswith("/wp-content/")
+DUMPEN = "https://dumpen.se"
+UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -28,9 +25,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def end_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "*")
-        self.send_header("Access-Control-Expose-Headers", "*")
         super().end_headers()
 
     def do_OPTIONS(self):
@@ -38,47 +34,63 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_HEAD(self):
-        if _is_proxy_path(self.path):
-            self._proxy(API_BASE + self.path, method="HEAD")
-            return
-        super().do_HEAD()
+        self._handle()
 
     def do_GET(self):
-        if _is_proxy_path(self.path):
-            self._proxy(API_BASE + self.path, method="GET")
+        self._handle()
+
+    def _handle(self):
+        # Proxya /proxy/* till dumpen.se
+        if self.path.startswith("/proxy/"):
+            target = DUMPEN + self.path[len("/proxy"):]
+            self._proxy(target)
             return
-        super().do_GET()
 
-    def _proxy(self, target_url: str, method: str = "GET"):
+        # Försök serva lokalt
+        super().do_GET() if self.command == "GET" else super().do_HEAD()
+
+    def _proxy(self, target_url: str):
         try:
-            headers = {"User-Agent": "DumpenApp/1.0"}
-            if self.path.startswith("/wp-json/"):
-                headers["Accept"] = "application/json"
-
-            req = urllib.request.Request(target_url, headers=headers, method=method)
+            req = urllib.request.Request(target_url, headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=60) as resp:
-                body = b""
-                if method != "HEAD":
-                    body = resp.read()
+                body = resp.read()
                 self.send_response(resp.status)
-                for key, value in resp.headers.items():
+                for key, value in resp.getheaders():
                     lower = key.lower()
-                    if lower in ("content-encoding", "transfer-encoding", "access-control-allow-origin"):
+                    if lower in ("content-encoding", "transfer-encoding",
+                                "access-control-allow-origin",
+                                "access-control-allow-methods",
+                                "access-control-allow-headers",
+                                "content-length"):
                         continue
                     self.send_header(key, value)
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
-                if body:
+                if self.command != "HEAD":
                     self.wfile.write(body)
         except urllib.error.HTTPError as e:
+            body = e.read()
             self.send_response(e.code)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(body)))
             self.end_headers()
-            if method != "HEAD":
-                self.wfile.write(e.read())
+            if self.command != "HEAD":
+                self.wfile.write(body)
         except Exception as e:
+            msg = f"Proxy error: {e}".encode()
             self.send_response(502)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(msg)))
             self.end_headers()
-            if method != "HEAD":
-                self.wfile.write(f"Proxy error: {e}".encode())
+            if self.command != "HEAD":
+                self.wfile.write(msg)
+
+    def log_message(self, format, *args):
+        # Tysta loggen lite
+        pass
 
 
 def main():
@@ -86,9 +98,11 @@ def main():
         print(f"Hittade inte {BUILD_DIR}. Kör 'flutter build web' först.")
         sys.exit(1)
 
+    socketserver.TCPServer.allow_reuse_address = True
+
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"Server kör på http://localhost:{PORT}")
-        print("Öppna den URL:en i Chrome för att se appen.")
+        print(f"Dumpen app kör på http://localhost:{PORT}")
+        print(f"På mobil: http://192.168.0.23:{PORT}")
         print("Tryck Ctrl+C för att stoppa.")
         httpd.serve_forever()
 

@@ -4,7 +4,6 @@
 /// HTML-brödtext med Noto Serif, inbäddade videor, Swish-banner.
 library;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -15,9 +14,11 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:html/parser.dart' as html_parser;
 
 import '../constants/app_colors.dart';
+import '../constants/app_config.dart';
 import '../models/post.dart';
 import '../services/wordpress_api.dart';
 import '../widgets/html_video_player.dart';
+import '../widgets/proxy_image.dart';
 import '../widgets/swish_banner.dart';
 
 class ArticleScreen extends StatefulWidget {
@@ -234,6 +235,30 @@ class _ArticleScreenState extends State<ArticleScreen> {
                   // Brödtext (HTML)
                   Html(
                     data: articleHtml,
+                    extensions: [
+                      TagExtension(
+                        tagsToExtend: {'img'},
+                        builder: (extensionContext) {
+                          final src = extensionContext.attributes['src'] ?? '';
+                          if (src.isEmpty) return const SizedBox.shrink();
+                          final proxied = AppConfig.proxyUrl(src);
+                          return Image.network(
+                            proxied,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return const SizedBox(
+                                height: 200,
+                                child: Center(child: CircularProgressIndicator()),
+                              );
+                            },
+                            errorBuilder: (context, error, stack) {
+                              return const SizedBox.shrink();
+                            },
+                          );
+                        },
+                      ),
+                    ],
                     style: {
                       'body': Style(
                         color: AppColors.foreground,
@@ -318,11 +343,11 @@ class _ArticleScreenState extends State<ArticleScreen> {
       children: [
         AspectRatio(
           aspectRatio: 16 / 9,
-          child: CachedNetworkImage(
+          child: ProxyImage(
             imageUrl: imageUrl,
             fit: BoxFit.cover,
-            placeholder: (_, __) => Container(color: AppColors.surfaceLight),
-            errorWidget: (_, __, ___) => Container(
+            placeholder: Container(color: AppColors.surfaceLight),
+            errorWidget: Container(
               color: AppColors.surfaceLight,
               child: const Center(
                 child: Icon(Icons.broken_image, color: Colors.grey, size: 48),

@@ -4,7 +4,6 @@
 /// i listläge med bild till vänster och text till höger (som dumpen.se).
 library;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +14,7 @@ import '../constants/app_constants.dart';
 import '../models/post.dart';
 import '../services/wordpress_api.dart';
 import '../widgets/pike_header.dart';
+import '../widgets/proxy_image.dart';
 import 'article_screen.dart';
 import 'search_screen.dart';
 
@@ -161,16 +161,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Bakgrundsbild
                 AspectRatio(
                   aspectRatio: 16 / 10,
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: imageUrl,
+                  child: (imageUrl != null && imageUrl.isNotEmpty)
+                      ? ProxyImage(
+                          // ignore: unnecessary_non_null_assertion
+                          imageUrl: imageUrl!,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) => Shimmer.fromColors(
+                          placeholder: Shimmer.fromColors(
                             baseColor: AppColors.shimmerBackground,
                             highlightColor: AppColors.shimmerHighlight,
                             child: Container(color: Colors.grey.shade200),
                           ),
-                          errorWidget: (_, __, ___) => Container(
+                          errorWidget: Container(
                             color: AppColors.surfaceLight,
                             child: const Icon(Icons.broken_image,
                                 color: Colors.grey, size: 48),
@@ -539,15 +540,17 @@ class _ArticleListItem extends StatelessWidget {
                       fit: StackFit.expand,
                       children: [
                         imageUrl != null && imageUrl.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: imageUrl,
+                            ? ProxyImage(
+                                // ignore: unnecessary_non_null_assertion
+                                imageUrl: imageUrl!,
                                 fit: BoxFit.cover,
-                                placeholder: (_, __) => Shimmer.fromColors(
+                                borderRadius: BorderRadius.circular(10),
+                                placeholder: Shimmer.fromColors(
                                   baseColor: AppColors.shimmerBackground,
                                   highlightColor: AppColors.shimmerHighlight,
                                   child: Container(color: Colors.grey.shade200),
                                 ),
-                                errorWidget: (_, __, ___) => Container(
+                                errorWidget: Container(
                                   color: AppColors.surfaceLight,
                                   child: const Icon(Icons.broken_image,
                                       color: Colors.grey, size: 32),

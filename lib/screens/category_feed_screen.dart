@@ -3,7 +3,6 @@
 /// Hero-header med kategorifärg, sedan artikellista i listläge.
 library;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +12,7 @@ import 'package:shimmer/shimmer.dart';
 import '../constants/app_colors.dart';
 import '../models/post.dart';
 import '../services/wordpress_api.dart';
+import '../widgets/proxy_image.dart';
 import 'article_screen.dart';
 
 class CategoryFeedScreen extends StatefulWidget {
@@ -320,10 +320,11 @@ class _ArticleListItem extends StatelessWidget {
                       fit: StackFit.expand,
                       children: [
                         imageUrl != null && imageUrl.isNotEmpty
-                            ? CachedNetworkImage(
+                            ? ProxyImage(
                                 imageUrl: imageUrl,
                                 fit: BoxFit.cover,
-                                placeholder: (_, __) => Shimmer.fromColors(
+                                borderRadius: BorderRadius.circular(10),
+                                placeholder: Shimmer.fromColors(
                                   baseColor: AppColors.shimmerBackground,
                                   highlightColor: AppColors.shimmerHighlight,
                                   child: Container(color: Colors.white),

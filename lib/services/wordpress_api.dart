@@ -10,12 +10,13 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import '../constants/app_config.dart';
 import '../constants/app_constants.dart';
 import '../models/post.dart';
 import 'cache_service.dart';
 
 class WordPressApi {
-  static const String _baseUrl = AppConstants.apiBaseUrl;
+  static final String _baseUrl = AppConfig.apiBaseUrl;
   static const String _embed = 'author,wp:featuredmedia';
   static const Duration _timeout = Duration(seconds: 15);
 
@@ -30,7 +31,7 @@ class WordPressApi {
   Future<List<dynamic>> _getList(String path) async {
     final uri = Uri.parse('$_baseUrl$path');
     final response = await _client
-        .get(uri)
+        .get(uri, headers: {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 DumpenApp/1.0'})
         .timeout(_timeout, onTimeout: () => throw TimeoutException('Timeout'));
 
     if (response.statusCode != 200) {
@@ -47,7 +48,7 @@ class WordPressApi {
   Future<Map<String, dynamic>> _getObject(String path) async {
     final uri = Uri.parse('$_baseUrl$path');
     final response = await _client
-        .get(uri)
+        .get(uri, headers: {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 DumpenApp/1.0'})
         .timeout(_timeout, onTimeout: () => throw TimeoutException('Timeout'));
 
     if (response.statusCode != 200) {

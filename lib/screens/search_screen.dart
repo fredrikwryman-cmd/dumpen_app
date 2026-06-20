@@ -1,7 +1,6 @@
 /// # Sökskärm — professionell redesign
 library;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +10,7 @@ import 'package:shimmer/shimmer.dart';
 import '../constants/app_colors.dart';
 import '../models/post.dart';
 import '../services/wordpress_api.dart';
+import '../widgets/proxy_image.dart';
 import 'article_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -324,9 +324,11 @@ class _SearchResultItem extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: imageUrl != null && imageUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: imageUrl,
+                        ? ProxyImage(
+                            // ignore: unnecessary_non_null_assertion
+                            imageUrl: imageUrl!,
                             fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(10),
                           )
                         : Container(
                             color: AppColors.surfaceLight,
