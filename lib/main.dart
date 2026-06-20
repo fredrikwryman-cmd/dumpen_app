@@ -365,14 +365,9 @@ class _MainScaffoldState extends State<_MainScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: IndexedStack(
-            index: _currentIndex,
-            children: _pages,
-          ),
-        ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -380,26 +375,29 @@ class _MainScaffoldState extends State<_MainScaffold> {
             top: BorderSide(color: AppColors.borderSubtle, width: 1),
           ),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Hem',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view_outlined),
-              activeIcon: Icon(Icons.grid_view),
-              label: 'Kategorier',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.volunteer_activism_outlined),
-              activeIcon: Icon(Icons.volunteer_activism),
-              label: 'Stöd',
-            ),
-          ],
+        child: SafeArea(
+          top: false,
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) => setState(() => _currentIndex = index),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'Hem',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.grid_view_outlined),
+                activeIcon: Icon(Icons.grid_view),
+                label: 'Kategorier',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.volunteer_activism_outlined),
+                activeIcon: Icon(Icons.volunteer_activism),
+                label: 'Stöd',
+              ),
+            ],
+          ),
         ),
       ),
     );

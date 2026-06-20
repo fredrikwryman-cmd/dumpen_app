@@ -1,26 +1,25 @@
 /// # Runtime-konfiguration — avgör om vi kör via lokal proxy eller direkt.
 library;
 ///
-/// I web-läge när appen servas via [serve_web.py] behöver alla
-/// dumpen.se-requests gå genom proxyn för att undvika CORS-blockering.
-/// I mobil-läge (Android/iOS) ansluter vi direkt.
+/// - Web (hosted): använder alltid direkt anrop (kräver CORS-stöd eller proxy)
+/// - Web (via serve_web.py): `/proxy` vidarebefordrar till dumpen.se
+/// - Mobil (direkt): `https://dumpen.se/wp-json/wp/v2`
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AppConfig {
   /// Bas-URL för alla dumpen.se-requests.
-  ///
-  /// - Web (via proxy): `/proxy` → proxyn vidarebefordrar till dumpen.se
-  /// - Mobil (direkt):  `https://dumpen.se/wp-json/wp/v2`
   static String get apiBaseUrl {
-    if (kIsWeb) return '/proxy/wp-json/wp/v2';
+    // Direkt anrop — fungerar om dumpen.se har CORS-headrar,
+    // annars krävs proxy (serve_web.py lokalt).
     return 'https://dumpen.se/wp-json/wp/v2';
   }
 
   /// Proxy-prefix för bilder och media.
-  /// I web-läge lägger vi till `/proxy` framför alla dumpen.se-URL:er.
+  /// I web-läge via serve_web.py lägger vi till `/proxy` framför dumpen.se-URL:er.
   static String proxyUrl(String url) {
     if (!kIsWeb) return url;
+    // När vi kör via serve_web.py lokalt, byt till proxy
     if (url.startsWith('https://dumpen.se')) {
       return '/proxy${url.substring('https://dumpen.se'.length)}';
     }
